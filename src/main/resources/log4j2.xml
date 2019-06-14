@@ -1,0 +1,41 @@
+<Configuration noxmlns='http://logging.apache.org/log4j/2.0/config' packages="com.ionic.sdk.addon.log4j2" status="info">
+    <Properties>
+        <Property name="logdir">${sys:catalina.base}/logs</Property>
+        <Property name="layout">IONIC %d [%t] %-5p %c- %m%n</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="PLAINTEXT" fileName="${logdir}/plaintext.log" filePattern="${logdir}/plaintext.%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${layout}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="1 MB"/> 
+            </Policies> 
+            <DefaultRolloverStrategy max="10"/> 
+        </RollingFile>
+        <IonicRollingFile name="IONIC" fileName="${logdir}/ionic.log" filePattern="${logdir}/ionic.%d{yyyy-MM-dd}-%i.log"
+                          ionicProfile="ionic.sep.plaintext.json">
+            <PatternLayout pattern="${layout}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="1 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </IonicRollingFile>
+    </Appenders>
+    <Loggers> 
+        <Root level="INFO">
+            <AppenderRef ref="PLAINTEXT"/>
+            <AppenderRef ref="IONIC"/>
+        </Root>
+        <Logger name="org.apache.catalina.core.ContainerBase.[Catalina].[localhost]" level="INFO" additivity="false">
+            <AppenderRef ref="PLAINTEXT"/>
+            <AppenderRef ref="IONIC"/>
+        </Logger>
+        <Logger name="com.ionic.sdk.addon.tomcat" level="TRACE" additivity="false">
+            <AppenderRef ref="PLAINTEXT"/>
+            <AppenderRef ref="IONIC"/>
+        </Logger>
+    </Loggers>
+</Configuration>
