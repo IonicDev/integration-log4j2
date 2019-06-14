@@ -1,4 +1,4 @@
-# Ionic Java SDK Sample App / Log4j / Tomcat
+# Ionic Java SDK Sample Web Application / Log4j / Tomcat
 
 The [Ionic SDK](https://dev.ionic.com/) provides an easy-to-use interface to the
 [Ionic Platform](https://www.ionic.com/). In particular, the Ionic SDK exposes functions to perform Key Management
@@ -385,7 +385,7 @@ configuration to use log4j within Tomcat.
 
 1. Clone git demo repository into an empty folder on your filesystem.
     ```
-    git clone https://github.com/greyp-ionic/javasdk-sample-log4j2.git
+    git clone https://github.com/IonicDev/integration-log4j2.git
     ```
 1. Navigate to the root folder of the *javasdk-sample-log4j2* repository.  Run the following command to assemble the
 demo webapp:
