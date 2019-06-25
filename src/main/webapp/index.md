@@ -51,7 +51,7 @@ recover the associated plaintext will also be demonstrated.
 ## Tomcat
 
 Java is a popular language used in back-end web processes to serve dynamic content.   Among open source Java web
-containers, [Tomcat](http://tomcat.apache.org/) and [Jetty](https://www.eclipse.org/jetty/) are two of the most
+containers, [Tomcat](https://tomcat.apache.org/) and [Jetty](https://www.eclipse.org/jetty/) are two of the most
 popular.  Web containers allow packaged web applications (webapps) to be hosted, serving dynamic content upon request.
 Web browsers like Google Chrome, Mozilla Firefox, and Apple Safari are popular web clients that interact with web
 servers.
@@ -373,7 +373,13 @@ This allows access to the Tomcat manager UI, which allows easy deployment of thi
 **[tomcat/lib/log4j-core-2.11.2.jar]**
 
 These three libraries are not included in the default Tomcat download image, but provide the necessary classes and
-configuration to use log4j within Tomcat.
+configuration to use log4j within Tomcat.  Download them from the [Maven Central repository](https://repo1.maven.org/), 
+and add them to the folder *[tomcat/lib]*.
+
+- [log4j-api-2.11.2.jar](https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.11.2/log4j-api-2.11.2.jar).
+- [log4j-appserver-2.11.2.jar](https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-appserver/2.11.2/log4j-appserver-2.11.2.jar).
+- [log4j-core-2.11.2.jar](https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.11.2/log4j-core-2.11.2.jar).
+
 
 ## Demo Walkthrough
 
