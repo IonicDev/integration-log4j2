@@ -295,11 +295,11 @@ used to demonstrate the Ionic capabilities.
 ```
     <Appenders>
         <RollingFile name="PLAINTEXT" fileName="${logdir}/plaintext.log" filePattern="${logdir}/plaintext.%d{yyyy-MM-dd}-%i.log">
-            ...
+            ... check log4j documentation for available options ...
         </RollingFile>
         <IonicRollingFile name="IONIC" fileName="${logdir}/ionic.log" filePattern="${logdir}/ionic.%d{yyyy-MM-dd}-%i.log"
                           ionicProfile="ionic.sep.plaintext.json">
-            ...
+            ... check log4j documentation for available options ...
         </IonicRollingFile>
     </Appenders>
 ```
@@ -426,11 +426,15 @@ webapps.  Click on the link to the application (in the left-most column of the *
 
     ![Webapp Home Page](./webapp.png)
 
-1. Click the links for *ionic.log* and *plaintext.log*.  You should see the same content for each.
+1. Click the links for *ionic.log* and *plaintext.log*.  You should see the same content for each.  The file 
+*plaintext.log* is retrieved from the filesystem and rendered by Tomcat unaltered.  The file *ionic.log* is retrieved 
+from the filesystem and passed through a Tomcat filter, which decrypts the content and passes along the plaintext to 
+the requester.
 
 1. Navigate in the filesystem browser for your OS to the *logs* subfolder of the Tomcat root folder.  Open
 *plaintext.log* and *ionic.log*.  Observe that your OS displays *plaintext.log* normally, but *ionic.log* as a file
-with an Ionic file header, followed by ciphertext.
+with an Ionic file header, followed by ciphertext.  Without the Tomcat filter intermediary, the file content 
+differences are apparent.
 
 ## Conclusion
 
