@@ -15,8 +15,12 @@ protection on capture: application log files.
 ## Prerequisites
 
 - physical machine (or virtual machine) with the following software installed
-  - Java Runtime Environment 7+
-  - Apache Maven (Java software project management tool)
+  - [Git](https://git-scm.com/) distributed version control system 
+  - Java Runtime Environment 7+ (either
+    [OpenJDK JRE](https://openjdk.java.net/install/index.html) or
+    [Oracle JRE](https://www.oracle.com/technetwork/java/javase/downloads/index.html))
+  - [Apache Maven](https://maven.apache.org/) (Java software project management tool)
+- a valid PKCS12 or JKS [SSL keystore file](https://tomcat.apache.org/tomcat-9.0-doc/ssl-howto.html)
 - a valid [Ionic Secure Enrollment Profile](https://dev.ionic.com/getting-started/create-ionic-profile) (a plaintext
 json file containing access token data)
 
@@ -82,7 +86,7 @@ Let's take a brief tour of the content of this demo project.
 
 Maven is a commonly used build tool that will be used to assemble the demo project.
 
-**[javasdk-addon-log4j2/pom.xml]**
+**[integration-log4j2/pom.xml]**
 
 Here we declare the dependencies for the project.
 ```
@@ -111,7 +115,7 @@ It is being built against current (May 2019) releases of Tomcat and Log4j.
 Two classes were derived from the log4j code: IonicRollingFileAppender and IonicAbstractOutputStreamAppender.  Ionic
 additions to the classes are called out below.
 
-**[javasdk-addon-log4j2/src/main/java/com/ionic/sdk/addon/log4j2/core/appender/IonicRollingFileAppender.java]**
+**[integration-log4j2/src/main/java/com/ionic/sdk/addon/log4j2/core/appender/IonicRollingFileAppender.java]**
 
 Here we are specifying an extra bit of Appender configuration.
 ``` java
@@ -166,7 +170,7 @@ header to the ciphertext, specifying the Ionic key in use for the file.
 ```
 
 
-**[javasdk-addon-log4j2/src/main/java/com/ionic/sdk/addon/log4j2/core/appender/IonicAbstractOutputStreamAppender.java]**
+**[integration-log4j2/src/main/java/com/ionic/sdk/addon/log4j2/core/appender/IonicAbstractOutputStreamAppender.java]**
 
 As each log4j message is sent to its output file, the content is encrypted and the encrypted content is substituted in
 the output stream.
@@ -203,15 +207,15 @@ folder.  A
 simplistic algorithm is used to determine whether to apply Ionic decryption to the output resource, based on the name
 of the requested resource.
 
-**[javasdk-addon-log4j2/src/main/java/com/ionic/sdk/addon/tomcat/servlet/IonicServletOutputStream.java]**
+**[integration-log4j2/src/main/java/com/ionic/sdk/addon/tomcat/servlet/IonicServletOutputStream.java]**
 
 Contains boilerplate code needed for the implementation.
 
-**[javasdk-addon-log4j2/src/main/java/com/ionic/sdk/addon/tomcat/servlet/http/IonicServletResponseWrapper.java]**
+**[integration-log4j2/src/main/java/com/ionic/sdk/addon/tomcat/servlet/http/IonicServletResponseWrapper.java]**
 
 Contains boilerplate code needed for the implementation.
 
-**[javasdk-addon-log4j2/src/main/java/com/ionic/sdk/addon/tomcat/servlet/IonicFilter.java]**
+**[integration-log4j2/src/main/java/com/ionic/sdk/addon/tomcat/servlet/IonicFilter.java]**
 
 Analogous to the specification of *ionicProfile* in the log4j configuration, the Ionic Secure Enrollment Profile
 resource location is specified in the filter config.  (These two SEPs may be different, if desired, but must refer to
@@ -270,17 +274,17 @@ entity header for the Ionic header text.
 
 ### Webapp Configuration
 
-**[javasdk-addon-log4j2/src/main/webapp/context.xml]**
+**[integration-log4j2/src/main/webapp/META-INF/context.xml]**
 
 The default configuration of Tomcat does not specify that the content of the *logs* folder should be accessible.  This
-configuration enables accessibility to demonstrate the Ionic functionality.
+configuration enables accessibility to the *logs* folder to demonstrate the Ionic functionality.
 ```
     <Resources>
         <PreResources base="${catalina.base}/logs" className="org.apache.catalina.webresources.DirResourceSet" webAppMount="/logs" />
     </Resources>
 ```
 
-**[javasdk-addon-log4j2/src/main/resources/log4j2.xml]**
+**[integration-log4j2/src/main/resources/log4j2.xml]**
 
 This file specifies the log4j2 configuration for the webapp.
 
@@ -304,7 +308,7 @@ used to demonstrate the Ionic capabilities.
     </Appenders>
 ```
 
-The configuration for the PLAINTEXT and IONIC loggers is identical, in order to demonstrate the different handling of
+The configuration for the PLAINTEXT and IONIC loggers is identical, in order to demonstrate the altered handling of
 the Ionic-enabled appender.
 ```
     <Loggers>
@@ -332,21 +336,28 @@ Some modifications to the Tomcat download image are needed to fully enable this 
 
 **[tomcat/bin/catalina.bat]**
 
-This turns off the default *log4j* handling of output messages, substituting the legacy output handling.
+Edit this file, and add this line to turn off the default *log4j* handling of output messages, substituting the legacy 
+output handling.
 ```
 set "JAVA_OPTS=%JAVA_OPTS% -Dlog4j2.enable.direct.encoders=false"
 ```
 
+**[tomcat/conf/server.pkcs12]**
+
+Add this prerequisite file to the folder *[tomcat/conf]*.
+
 **[tomcat/conf/ionic.sep.plaintext.json]**
 
-The file contains the Ionic Secure Enrollment Profile (SEP) data, which defines the Ionic server to use, as well as data
-to identify the client making the requests.  More details can be found
-[here](https://dev.ionic.com/platform/enrollment).
+The file contains the Ionic Secure Enrollment Profile (SEP) data, which defines the Ionic server to use, as well as 
+data to identify the client making the requests.  Add this prerequisite file to the folder *[tomcat/conf]*.  More 
+details can be found [here](https://dev.ionic.com/platform/enrollment).
 
 **[tomcat/conf/server.xml]**
 
-This enables Tomcat to service TLS requests on an additional port.  More details can be found
-[here](https://tomcat.apache.org/tomcat-9.0-doc/ssl-howto.html).
+Edit this file to enable Tomcat to service TLS requests on an additional port.  The value of the setting 
+*certificateKeystoreFile* will be the filesystem path of the valid PKCS12 or JKS keystore file, relative to the Tomcat 
+root folder.  If your keystore is password-protected, the password will also be specified here.  More details can be 
+found [here](https://tomcat.apache.org/tomcat-9.0-doc/ssl-howto.html).
 ```
     <!--
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
@@ -361,7 +372,8 @@ This enables Tomcat to service TLS requests on an additional port.  More details
 
 **[tomcat/conf/tomcat-users.xml]**
 
-This allows access to the Tomcat manager UI, which allows easy deployment of this demo webapp.
+This allows access to the Tomcat manager UI, which allows easy deployment of this demo webapp.  Edit this file, and add 
+configuration for a user with the *manager-gui* role.
 ```
     <user username="youruser" password="yourpassword" roles="manager-gui"/>
 ```
@@ -393,7 +405,7 @@ and add them to the folder *[tomcat/lib]*.
     ```
     git clone https://github.com/IonicDev/integration-log4j2.git
     ```
-1. Navigate to the root folder of the *javasdk-sample-log4j2* repository.  Run the following command to assemble the
+1. Navigate to the root folder of the *integration-log4j2* repository.  Run the following command to assemble the
 demo webapp:
     ```
     mvn clean package
@@ -415,7 +427,7 @@ demo webapp:
     ![Manager Webapp](./manager-gui.png)
 
 1. Scroll down on the manager UI page to the *WAR file to deploy* section.  Click the *Select File* button.  Select
-the webapp just built by the Maven tool (located in *javasdk-addon-log4j2/target*.  Click the *Deploy* button.
+the webapp just built by the Maven tool (located in *integration-log4j2/target*.  Click the *Deploy* button.
 
     ![Deploy WAR](./deploy-war.png)
 
