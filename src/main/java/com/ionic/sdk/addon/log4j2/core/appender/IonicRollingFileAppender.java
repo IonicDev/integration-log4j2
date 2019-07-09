@@ -287,6 +287,11 @@ public final class IonicRollingFileAppender extends IonicAbstractOutputStreamApp
     private final String filePattern;
 
     /**
+     * Ionic, derived from source at:
+     *  https://github.com/apache/logging-log4j2/blob/61f125b8b879d1a0852b24358da7424baeb20c31/log4j-core/src/main/java/org/apache/logging/log4j/core/appender/RollingFileAppender.java
+     */
+
+    /**
      * Ionic state: location of Ionic Secure Enrollment Profile (on classpath)
      */
     private final String ionicProfile;

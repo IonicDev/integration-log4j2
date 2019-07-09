@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * Support class, needed by {@link com.ionic.sdk.addon.tomcat.servlet.IonicFilter} to perform conditional decrypt
+ * operation on HTTP response body.
+ */
 public class IonicServletResponseWrapper extends HttpServletResponseWrapper {
 
     private final ByteArrayOutputStream os;

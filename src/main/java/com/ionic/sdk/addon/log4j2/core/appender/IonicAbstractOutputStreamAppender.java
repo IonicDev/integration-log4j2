@@ -103,28 +103,48 @@ public abstract class IonicAbstractOutputStreamAppender<M extends OutputStreamMa
     private final M manager;
 
     /**
-     * Ionic state: cache of data to be written to underlying appender
+     * Ionic, derived from source at:
+     *  https://github.com/apache/logging-log4j2/blob/61f125b8b879d1a0852b24358da7424baeb20c31/log4j-core/src/main/java/org/apache/logging/log4j/core/appender/AbstractOutputStreamAppender.java
+     */
+
+    /**
+     * Ionic state.
+     *
+     * Cache of data to be written to underlying log4j appender.  This object is supplied to the {@link GenericOutput}
+     * constructor.  The cache is written to and emptied in the context of the write call.
      */
     private ByteArrayOutputStream bos;
 
     /**
-     * Ionic state: internal GenericFileCipher class
+     * Ionic state.
+     *
+     * Ionic GenericFileCipher internal class.  As log content is received by this Appender, the content is piped into
+     * GenericOutput, where it is encrypted.  The encrypted content is then passed along to be written to the
+     * filesystem.
+     *
+     * GenericOutput is reset when the underlying file is rotated.  This results in the fetch of a new AES key (each
+     * file is encrypted by exactly one key).
      */
     private GenericOutput genericOutput = null;
 
     /**
-     * On rollover of {@link OutputStreamManager} backing file, Ionic file cipher state is reset.
+     * On rollover of {@link OutputStreamManager} backing file, Ionic file cipher state is reset (causing the
+     * encryption key to be rotated).
      *
      * @param agent Ionic key services implementation
      * @throws IonicException on failure to initialize Ionic file cipher state
      * @throws IOException    on failure to write to the stream
      */
     protected void setGenericOutput(final Agent agent) throws IonicException, IOException {
+        // initialize GenericOutput to receive data to be encrypted
         this.bos = new ByteArrayOutputStream();
         this.genericOutput = new GenericOutput(bos, 1024 * 1024, agent);
+        // select file format version 1.3 (allowing for variable length data writes)
         final FileCryptoEncryptAttributes encryptAttributes =
                 new FileCryptoEncryptAttributes(FileCipher.Generic.V13.LABEL);
+        // initialize call causes an Ionic platform key create operation
         this.genericOutput.init(encryptAttributes);
+        // flush the Ionic generic file header to disk
         final byte[] genericHeader = bos.toByteArray();
         manager.writeBytes(genericHeader, 0, genericHeader.length);
         this.bos.reset();
@@ -257,12 +277,15 @@ public abstract class IonicAbstractOutputStreamAppender<M extends OutputStreamMa
     private void writeByteArrayToManagerIonic(final byte[] bytes) {
         try {
             SdkData.checkTrue(genericOutput != null, SdkError.ISAGENT_NOINIT);
+            // prepare plaintext for Ionic API call
             final ByteBuffer bufferPlainText = genericOutput.getPlainText();
             bufferPlainText.clear();
             bufferPlainText.put(bytes);
             bufferPlainText.limit(bufferPlainText.position());
             bufferPlainText.position(0);
+            // encrypt the data block (the encrypted text is written to the provided ByteArrayOutputStream)
             genericOutput.write(bufferPlainText);
+            // write the ciphertext to the underlying log4j output stream
             final byte[] bytesIonic = bos.toByteArray();
             manager.writeBytes(bytesIonic, 0, bytesIonic.length);
             manager.flush();

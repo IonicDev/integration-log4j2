@@ -12,6 +12,9 @@ An interesting use case for the Ionic platform in general, and this file format 
 telemetry data from some automated process.  This sample webapp is intended to demonstrate a simple example of data
 protection on capture: application log files.
 
+1. Log files can seamlessly be encrypted as they are written to disk (using a log4j OutputStreamAppender extension).
+1. A web server can serve the decrypted log file content on request (using a Tomcat HTTP filter).
+
 ## Prerequisites
 
 - physical machine (or virtual machine) with the following software installed
@@ -438,10 +441,11 @@ webapps.  Click on the link to the application (in the left-most column of the *
 
     ![Webapp Home Page](./webapp.png)
 
-1. Click the links for *ionic.log* and *plaintext.log*.  You should see the same content for each.  The file 
-*plaintext.log* is retrieved from the filesystem and rendered by Tomcat unaltered.  The file *ionic.log* is retrieved 
-from the filesystem and passed through a Tomcat filter, which decrypts the content and passes along the plaintext to 
-the requester.
+1. Click the links for *ionic.log* and *plaintext.log*.  The file *ionic.log* contains the ciphertext representation of 
+the content.  The file *plaintext.log* contains the unencrypted version of the content.  The web server will serve 
+normal log text for each.  The file *plaintext.log* is retrieved from the filesystem and rendered by Tomcat 
+unaltered.  The file *ionic.log* is retrieved from the filesystem and passed through an Ionic-enabled Tomcat filter, 
+which decrypts the content and passes along the plaintext to the requester.
 
 1. Navigate in the filesystem browser for your OS to the *logs* subfolder of the Tomcat root folder.  Open
 *plaintext.log* and *ionic.log*.  Observe that your OS displays *plaintext.log* normally, but *ionic.log* as a file
@@ -453,4 +457,4 @@ differences are apparent.
 This demo webapp has demonstrated a custom *log4j* appender that protects application log messages.  But Ionic software
 and infrastructure may also be used to protect other forms of data.  Audio streams, video streams, network traffic, and
 health-related telemetry might be captured and protected in a similar way.  Ionic's cryptography primitives and server
-infrastructure are well-suited to protect data on capture as well as at rest.
+infrastructure are well-suited to protect data in motion and data at rest.

@@ -5,6 +5,10 @@ import javax.servlet.WriteListener;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Support class, needed by {@link com.ionic.sdk.addon.tomcat.servlet.IonicFilter} to perform conditional decrypt
+ * operation on HTTP response body.
+ */
 public class IonicServletOutputStream extends ServletOutputStream {
 
     private final OutputStream os;
